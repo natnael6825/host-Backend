@@ -14,6 +14,8 @@ model User {
   email     String    @unique
   password  String
   role      Role @default(inspector)    // 'manager', 'inspector', 'maintenance'
+  authToken String
+  authExprire DateTime
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 

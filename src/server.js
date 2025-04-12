@@ -1,7 +1,7 @@
 // server.js
 import express from 'express';
 import dotenv from 'dotenv';
-import userRoutes from './routes/user/userController.js';
+import userRoutes from './routes/userRoute.js';
 
 dotenv.config();
 const app = express();
@@ -13,5 +13,8 @@ app.use('/api/users', userRoutes);
 
 app.get('/', (req, res) => res.send("API is running..."));
 
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+

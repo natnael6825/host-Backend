@@ -3,17 +3,34 @@ import prisma from '../prisma/client.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
+const JWT_EXPIRES_IN = '1d';
+
 export const register = async (req, res) => {
   const { name, email, password, role } = req.body;
 
   try {
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Generate token
+    const token = jwt.sign({ email, role }, process.env.JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+    const expireAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 1 day from now
+
+    // Create user with token and expiry
     const user = await prisma.user.create({
-      data: { name, email, password: hashedPassword, role },
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        role,
+        authToken: token,
+        authExprire: expireAt,
+      },
     });
-    res.status(201).json(user);
+
+    res.status(201).json({ token, user });
   } catch (err) {
-    res.status(500).json({ error: "User creation failed", details: err.message });
+    res.status(500).json({ error: 'User creation failed', details: err.message });
   }
 };
 
@@ -22,22 +39,29 @@ export const login = async (req, res) => {
 
   try {
     const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ message: "Invalid credentials" });
+    if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
 
-    const token = jwt.sign(
-      { id: user.id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '1d' }
-    );
+    // Generate token and update in DB
+    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+    const expireAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 1 day
 
-    res.json({ token, user });
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        authToken: token,
+        authExprire: expireAt,
+      },
+    });
+
+    res.json({ token, user: updatedUser });
   } catch (err) {
-    res.status(500).json({ error: "Login failed", details: err.message });
+    res.status(500).json({ error: 'Login failed', details: err.message });
   }
 };
+
 
 export const getMe = async (req, res) => {
   try {
