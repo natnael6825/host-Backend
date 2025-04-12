@@ -20,6 +20,36 @@ export const getInspections = async (req, res) => {
   }
 };
 
+export const getInspectionsByInspaectorId = async (req, res) => {
+    const { inspectorId } = req.body; // or use req.query
+  
+    try {
+      const inspections = await prisma.inspection.findMany({
+        where: {
+          assignedToId: inspectorId,
+        },
+        include: {
+          inspector: true,
+          category: true,
+          area: true,
+          assignedBy: true,
+          assignedTo: true,
+          responses: true,
+          issues: true,
+        },
+      });
+  
+      res.status(200).json(inspections);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        error: "Error fetching inspections by assignedTo",
+        details: err.message,
+      });
+    }
+  };
+  
+
 // Create a new inspection
 export const createInspection = async (req, res) => {
     const {
@@ -106,6 +136,7 @@ export const createInspection = async (req, res) => {
       categoryId,
       areaId,
       assignedById,
+      assignToId, // 👈 new field
       status,
       type,
       scheduledDate,
@@ -130,6 +161,7 @@ export const createInspection = async (req, res) => {
           categoryId,
           areaId,
           assignedById,
+          assignToId, // 👈 include here
           status,
           type,
           scheduledDate: scheduledDate ? new Date(scheduledDate) : undefined,

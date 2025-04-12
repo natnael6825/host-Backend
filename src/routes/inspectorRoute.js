@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getInspections } from "../controllers/inspactor.js";
+import { getInspections, getInspectionsByInspaectorId } from "../controllers/inspactor.js";
 import { createInspection } from "../controllers/inspactor.js";
 import { updateInspection } from "../controllers/inspactor.js";
 
@@ -11,6 +11,8 @@ router.get('/inspections', getInspections);
 // Route to create a new inspection
 router.post('/inspections', createInspection);
 router.put('/updateInspection', updateInspection);
+router.post('/inspections/by-inspector', getInspectionsByInspaectorId);
+
 
 
 export default router;
