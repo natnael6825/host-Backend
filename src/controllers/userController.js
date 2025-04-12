@@ -1,5 +1,5 @@
 // controllers/userController.js
-import prisma from '../prisma/client.js';
+import prisma from '../utils/prisma.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -12,9 +12,6 @@ export const register = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Generate token
-    const token = jwt.sign({ email, role }, process.env.JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
-    const expireAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 1 day from now
 
     // Create user with token and expiry
     const user = await prisma.user.create({
@@ -23,12 +20,11 @@ export const register = async (req, res) => {
         email,
         password: hashedPassword,
         role,
-        authToken: token,
-        authExprire: expireAt,
+     
       },
     });
 
-    res.status(201).json({ token, user });
+    res.status(201).json({ user });
   } catch (err) {
     res.status(500).json({ error: 'User creation failed', details: err.message });
   }

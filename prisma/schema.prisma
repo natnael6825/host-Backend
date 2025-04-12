@@ -14,8 +14,8 @@ model User {
   email     String    @unique
   password  String
   role      Role @default(inspector)    // 'manager', 'inspector', 'maintenance'
-  authToken String
-  authExprire DateTime
+  authToken String?   
+  authExprire DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
@@ -49,8 +49,8 @@ model Inspection {
   categoryId   String
   area         Area         @relation(fields: [areaId], references: [id])
   areaId       String
-  assignedBy   User         @relation("AssignedInspections", fields: [assignedById], references: [id])
-  assignedById String
+  assignedBy   User?        @relation("AssignedInspections", fields: [assignedById], references: [id])
+  assignedById String?
   status       String 
   type         String      // 'pending', 'in_progress', 'completed'
   scheduledDate DateTime
