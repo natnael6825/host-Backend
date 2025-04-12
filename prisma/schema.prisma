@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  password  String
+  role      Role @default(inspector)    // 'manager', 'inspector', 'maintenance'
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  inspectionsAssigned     Inspection[] @relation("AssignedInspections")
+  inspectionsConducted    Inspection[] @relation("ConductedInspections")
+  issuesReported          IssueReport[]
+  tasksAssigned           MaintenanceTask[] @relation("AssignedTasks")
+  tasksReceived           MaintenanceTask[] @relation("ReceivedTasks")
+  followUps               FollowUp[]
+}
+
+model Category {
+  id           String       @id @default(uuid())
+  name         String
+  inspections  Inspection[]
+  issues       IssueReport[]
+}
+
+model Area {
+  id           String       @id @default(uuid())
+  name         String
+  inspections  Inspection[]
+  issues       IssueReport[]
+}
+
+model Inspection {
+  id           String       @id @default(uuid())
+  inspector    User         @relation("ConductedInspections", fields: [inspectorId], references: [id])
+  inspectorId  String
+  category     Category     @relation(fields: [categoryId], references: [id])
+  categoryId   String
+  area         Area         @relation(fields: [areaId], references: [id])
+  areaId       String
+  assignedBy   User         @relation("AssignedInspections", fields: [assignedById], references: [id])
+  assignedById String
+  status       String 
+  type         String      // 'pending', 'in_progress', 'completed'
+  scheduledDate DateTime
+  submittedAt  DateTime?
+
+  responses    InspectionResponse[]
+  issues       IssueReport[]
+}
+
+model InspectionResponse {
+  id             String      @id @default(uuid())
+  inspection     Inspection  @relation(fields: [inspectionId], references: [id])
+  inspectionId   String
+  response       String      // 'yes', 'no', 'needs_attention'
+  comment        String
+  mediaUrl       String
+}
+
+model IssueReport {
+  id           String     @id @default(uuid())
+  reportedBy   User       @relation(fields: [reportedById], references: [id])
+  reportedById String
+  inspection   Inspection @relation(fields: [inspectionId], references: [id])
+  inspectionId String
+  description  String
+  category     Category   @relation(fields: [categoryId], references: [id])
+  categoryId   String
+  area         Area       @relation(fields: [areaId], references: [id])
+  areaId       String
+  priority     String     // 'low', 'medium', 'high'
+  mediaUrl     String
+  status       String     // 'open', 'in_progress', 'resolved'
+  createdAt    DateTime   @default(now())
+
+  maintenanceTasks MaintenanceTask[]
+}
+
+model MaintenanceTask {
+  id            String        @id @default(uuid())
+  issue         IssueReport   @relation(fields: [issueId], references: [id])
+  issueId       String
+  assignedTo    User          @relation("ReceivedTasks", fields: [assignedToId], references: [id])
+  assignedToId  String
+  assignedBy    User          @relation("AssignedTasks", fields: [assignedById], references: [id])
+  assignedById  String
+  assignedAt    DateTime
+  startedAt     DateTime?
+  resolvedAt    DateTime?
+  resolutionNote String?
+  escalate      Boolean       @default(false)
+  status        String        // 'pending', 'in_progress', 'fixed', 'rejected'
+
+  followUps     FollowUp[]
+}
+
+model FollowUp {
+  id          String          @id @default(uuid())
+  task        MaintenanceTask @relation(fields: [taskId], references: [id])
+  taskId      String
+  inspector   User            @relation(fields: [inspectorId], references: [id])
+  inspectorId String
+  verifiedAt  DateTime
+  notes       String
+  status      String          // 'verified', 'not_resolved'
+}
+
+enum Role {
+  manager
+  inspector
+  maintenance
+}
