@@ -1,6 +1,6 @@
 // controllers/userController.js
 import prisma from '../utils/prisma.js';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
 const JWT_EXPIRES_IN = '1d';
