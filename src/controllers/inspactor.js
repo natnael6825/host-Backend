@@ -24,7 +24,7 @@ export const getInspectionsByInspaectorId = async (req, res) => {
     const { inspectorId } = req.body; // or use req.query
   
     try {
-      const inspections = await prisma.inspection.findMany({
+      const inspections = await prisma.issueReport.findMany({
         where: {
           assignedToId: inspectorId,
         },
@@ -174,6 +174,34 @@ export const createInspection = async (req, res) => {
       console.error(err);
       res.status(500).json({
         error: "Error updating inspection",
+        details: err.message,
+      });
+    }
+  };
+  
+
+  export const getInspectionsByArea = async (req, res) => {
+    const { areaId } = req.body; // or use req.query if passing as a query param
+  
+    try {
+      const inspections = await prisma.inspection.findMany({
+        where: {
+          areaId: areaId,
+        },
+        include: {
+          inspector: true,
+          category: true,
+          area: true,
+          responses: true,
+          issues: true,
+        },
+      });
+  
+      res.status(200).json(inspections);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        error: "Error fetching inspections by area",
         details: err.message,
       });
     }

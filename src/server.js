@@ -17,11 +17,12 @@ app.use(bodyParser.json());  // Parse JSON bodies
 
 
 // Routes
-app.use('/api/users', userRoutes);
+app.use('/api/', userRoutes);
 app.use('/api/inspect', inspectionRoutes);
 
 app.use('/api', categoryRoutes); // All category-related routes will be prefixed with /api
 app.use('/api', areaRoutes);
+
 app.use('/api/issue-reports', issueReportRoutes);
 app.use('/api/inspection-responses', inspectionResponseRoutes);
 

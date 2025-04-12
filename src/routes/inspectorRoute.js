@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getInspections, getInspectionsByInspaectorId } from "../controllers/inspactor.js";
+import { getInspections, getInspectionsByArea, getInspectionsByInspaectorId } from "../controllers/inspactor.js";
 import { createInspection } from "../controllers/inspactor.js";
 import { updateInspection } from "../controllers/inspactor.js";
 
@@ -12,6 +12,7 @@ router.get('/inspections', getInspections);
 router.post('/inspections', createInspection);
 router.put('/updateInspection', updateInspection);
 router.post('/inspections/by-inspector', getInspectionsByInspaectorId);
+router.post('/inspections/by-area', getInspectionsByArea);
 
 
 
