@@ -5,6 +5,7 @@ import userRoutes from './routes/userRoute.js';
 import inspectionRoutes from "./routes/inspectorRoute.js"
 import categoryRoutes from "./routes/categoryRoute.js"
 import areaRoutes from "./routes/areaRoute.js"
+import issueReportRoutes from "./routes/reportRoute.js"
 
 dotenv.config();
 const app = express();
@@ -17,6 +18,7 @@ app.use('/api/inspect', inspectionRoutes);
 
 app.use('/api', categoryRoutes); // All category-related routes will be prefixed with /api
 app.use('/api', areaRoutes);
+app.use('/api/issue-reports', issueReportRoutes);
 
 app.get('/', (req, res) => res.send("API is running..."));
 
