@@ -99,3 +99,51 @@ export const createInspection = async (req, res) => {
     }
   };
   
+  export const updateInspection = async (req, res) => {
+    const { id } = req.body;
+    const {
+      inspectorId,
+      categoryId,
+      areaId,
+      assignedById,
+      status,
+      type,
+      scheduledDate,
+      submittedAt,
+    } = req.body;
+  
+    try {
+      // Validate if inspection exists
+      const existingInspection = await prisma.inspection.findUnique({
+        where: { id },
+      });
+  
+      if (!existingInspection) {
+        return res.status(404).json({ error: "Inspection not found" });
+      }
+  
+      // Update inspection
+      const updatedInspection = await prisma.inspection.update({
+        where: { id },
+        data: {
+          inspectorId,
+          categoryId,
+          areaId,
+          assignedById,
+          status,
+          type,
+          scheduledDate: scheduledDate ? new Date(scheduledDate) : undefined,
+          submittedAt: submittedAt ? new Date(submittedAt) : undefined,
+        },
+      });
+  
+      res.status(200).json(updatedInspection);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        error: "Error updating inspection",
+        details: err.message,
+      });
+    }
+  };
+  
